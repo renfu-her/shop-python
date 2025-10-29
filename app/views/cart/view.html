@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+
+{% block title %}購物車 - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-shopping-cart me-2"></i>購物車
+        </h2>
+    </div>
+</div>
+
+{% if cart_items %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-0">
+                {% for item in cart_items %}
+                <div class="cart-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            {% if item.image_url %}
+                            <img src="{{ url_for('static', filename=item.image_url) }}" 
+                                 class="img-fluid rounded" 
+                                 alt="{{ item.product_name }}"
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                            <div class="img-placeholder rounded d-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-image fa-2x text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6 class="mb-1">{{ item.product_name }}</h6>
+                            <small class="text-muted">{{ item.store_name }}</small>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <div class="d-flex align-items-center">
+                                <form method="POST" action="{{ url_for('cart.update_quantity') }}" class="d-flex">
+                                    <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" 
+                                           min="1" max="{{ item.stock }}" class="form-control form-control-sm me-2" 
+                                           style="width: 60px;">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="price-normal">${{ "%.0f"|format(item.price) }}</div>
+                            {% if item.discount_price and item.discount_price != item.price %}
+                            <small class="text-muted text-decoration-line-through">${{ "%.0f"|format(item.original_price) }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="fw-bold">${{ "%.0f"|format(item.subtotal) }}</div>
+                        </div>
+                        
+                        <div class="col-md-1 text-center">
+                            <form method="POST" action="{{ url_for('cart.remove_item') }}" 
+                                  onsubmit="return confirm('確定要移除此商品嗎？')">
+                                <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">訂單摘要</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>商品總計：</span>
+                    <span>${{ "%.0f"|format(cart_items|sum(attribute='subtotal')) }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>運費：</span>
+                    <span class="text-success">免費</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between fw-bold fs-5">
+                    <span>總計：</span>
+                    <span class="text-primary">${{ "%.0f"|format(cart_items|sum(attribute='subtotal')) }}</span>
+                </div>
+                
+                <div class="d-grid mt-3">
+                    <a href="{{ url_for('cart.checkout') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-credit-card me-2"></i>結帳
+                    </a>
+                </div>
+                
+                <div class="d-grid mt-2">
+                    <a href="{{ url_for('product.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>繼續購物
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">購物車是空的</h4>
+            <p class="text-muted">快去選購您喜歡的商品吧！</p>
+            <a href="{{ url_for('product.index') }}" class="btn btn-primary">
+                <i class="fas fa-shopping-bag me-2"></i>開始購物
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

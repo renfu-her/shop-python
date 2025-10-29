@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block title %}頁面不存在 - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <div class="text-center">
+                    <!-- 404 Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle text-warning error-icon" style="font-size: 6rem;"></i>
+                    </div>
+            
+            <!-- Error Message -->
+            <h1 class="display-1 fw-bold text-primary mb-3">404</h1>
+            <h2 class="h3 mb-4">頁面不存在</h2>
+            <p class="lead text-muted mb-5">
+                抱歉，您訪問的頁面不存在或已被移除。<br>
+                請檢查網址是否正確，或返回首頁繼續瀏覽。
+            </p>
+            
+            <!-- Action Buttons -->
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                <a href="{{ url_for('product.index') }}" class="btn btn-demo btn-lg">
+                    <i class="fas fa-home me-2"></i>返回首頁
+                </a>
+                <button onclick="history.back()" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>返回上頁
+                </button>
+            </div>
+            
+            <!-- Helpful Links -->
+            <div class="mt-5">
+                <h5 class="mb-3">您可能想要：</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="{{ url_for('product.index') }}" class="text-decoration-none">
+                            <div class="card h-100 error-card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-shopping-bag text-primary mb-2" style="font-size: 2rem;"></i>
+                                    <h6 class="card-title">瀏覽商品</h6>
+                                    <p class="card-text small text-muted">發現優質商品</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('member.login') }}" class="text-decoration-none">
+                            <div class="card h-100 error-card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user text-primary mb-2" style="font-size: 2rem;"></i>
+                                    <h6 class="card-title">會員登入</h6>
+                                    <p class="card-text small text-muted">登入您的帳戶</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('cart.view_cart') }}" class="text-decoration-none">
+                            <div class="card h-100 error-card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-shopping-cart text-primary mb-2" style="font-size: 2rem;"></i>
+                                    <h6 class="card-title">購物車</h6>
+                                    <p class="card-text small text-muted">查看購物車</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Box -->
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-6">
+        <div class="card error-card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-3">找不到想要的商品？</h5>
+                <form action="{{ url_for('product.index') }}" method="GET" class="error-search-form">
+                    <input type="text" name="search" class="form-control" placeholder="搜尋商品..." aria-label="搜尋商品">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}個人資料 - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-user me-2"></i>個人資料
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <strong>姓名：</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ member.name }}
+                    </div>
+                </div>
+                <hr>
+                
+                <div class="row">
+                    <div class="col-sm-3">
+                        <strong>電子郵件：</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ member.email }}
+                    </div>
+                </div>
+                <hr>
+                
+                <div class="row">
+                    <div class="col-sm-3">
+                        <strong>電話：</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ member.phone or '未設定' }}
+                    </div>
+                </div>
+                <hr>
+                
+                <div class="row">
+                    <div class="col-sm-3">
+                        <strong>註冊時間：</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ member.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('member.edit_profile') }}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>編輯資料
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">快速操作</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('member.my_stores') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-store me-2"></i>我的商店
+                    </a>
+                    <a href="{{ url_for('order.my_orders') }}" class="btn btn-outline-info">
+                        <i class="fas fa-shopping-bag me-2"></i>我的訂單
+                    </a>
+                    <a href="{{ url_for('cart.view_cart') }}" class="btn btn-outline-success">
+                        <i class="fas fa-shopping-cart me-2"></i>購物車
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

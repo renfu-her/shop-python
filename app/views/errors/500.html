@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}服務器錯誤 - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <div class="text-center">
+                    <!-- 500 Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-tools text-danger error-icon" style="font-size: 6rem;"></i>
+                    </div>
+            
+            <!-- Error Message -->
+            <h1 class="display-1 fw-bold text-danger mb-3">500</h1>
+            <h2 class="h3 mb-4">服務器內部錯誤</h2>
+            <p class="lead text-muted mb-5">
+                抱歉，服務器遇到了問題，無法處理您的請求。<br>
+                我們正在努力修復這個問題，請稍後再試。
+            </p>
+            
+            <!-- Action Buttons -->
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                <a href="{{ url_for('product.index') }}" class="btn btn-demo btn-lg">
+                    <i class="fas fa-home me-2"></i>返回首頁
+                </a>
+                <button onclick="location.reload()" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-redo me-2"></i>重新載入
+                </button>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="mt-5">
+                <div class="card error-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">需要協助？</h5>
+                        <p class="card-text text-muted">
+                            如果問題持續發生，請聯繫我們的技術支援團隊。
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="mailto:support@demomall.com" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-envelope me-1"></i>發送郵件
+                            </a>
+                            <a href="{{ url_for('product.index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>返回首頁
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

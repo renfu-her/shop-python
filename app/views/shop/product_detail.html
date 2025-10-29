@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ product.name }} - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        {% if product.image_url %}
+        <img src="{{ url_for('static', filename=product.image_url) }}" 
+             class="img-fluid rounded" 
+             alt="{{ product.name }}"
+             style="max-height: 500px; object-fit: cover;">
+        {% else %}
+        <div class="img-placeholder rounded d-flex align-items-center justify-content-center" 
+             style="height: 500px;">
+            <i class="fas fa-image fa-4x text-muted"></i>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-6">
+        <h1 class="mb-3">{{ product.name }}</h1>
+        
+        <div class="mb-3">
+            <span class="badge bg-secondary">{{ product.category_name }}</span>
+            <span class="badge bg-info">{{ product.store_name }}</span>
+        </div>
+        
+        <div class="mb-4">
+            {% if product.discount_price %}
+            <div class="d-flex align-items-center">
+                <span class="price-discount fs-3 me-3">${{ "%.0f"|format(product.discount_price) }}</span>
+                <span class="price-original fs-5">${{ "%.0f"|format(product.price) }}</span>
+            </div>
+            {% else %}
+            <span class="price-normal fs-3">${{ "%.0f"|format(product.price) }}</span>
+            {% endif %}
+        </div>
+        
+        {% if product.description %}
+        <div class="mb-4">
+            <h5>商品描述</h5>
+            <p class="text-muted">{{ product.description }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="mb-4">
+            <div class="row">
+                <div class="col-sm-6">
+                    <strong>庫存狀態：</strong>
+                    {% if product.stock > 0 %}
+                    <span class="text-success">有庫存 ({{ product.stock }} 件)</span>
+                    {% else %}
+                    <span class="text-danger">缺貨</span>
+                    {% endif %}
+                </div>
+                <div class="col-sm-6">
+                    <strong>上架時間：</strong>
+                    <span class="text-muted">{{ product.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+        </div>
+        
+        {% if product.stock > 0 and session.member_id %}
+        <form method="POST" action="{{ url_for('product.add_to_cart') }}" class="mb-4">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <label for="quantity" class="form-label">數量：</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" 
+                           value="1" min="1" max="{{ product.stock }}">
+                </div>
+                <div class="col-md-8">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-cart-plus me-2"></i>加入購物車
+                    </button>
+                </div>
+            </div>
+        </form>
+        {% elif not session.member_id %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            請先<a href="{{ url_for('member.login') }}">登入</a>後才能購買商品
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            此商品目前缺貨
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Related Products -->
+{% if related_products %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h4 class="mb-4">相關商品</h4>
+        <div class="row">
+            {% for related in related_products %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card h-100 product-card">
+                    {% if related.image_url %}
+                    <img src="{{ url_for('static', filename=related.image_url) }}" 
+                         class="card-img-top" 
+                         alt="{{ related.name }}"
+                         style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 200px;">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title">{{ related.name }}</h6>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                {% if related.discount_price %}
+                                <div>
+                                    <span class="text-danger fw-bold">${{ "%.0f"|format(related.discount_price) }}</span>
+                                    <small class="text-muted text-decoration-line-through ms-1">${{ "%.0f"|format(related.price) }}</small>
+                                </div>
+                                {% else %}
+                                <span class="text-primary fw-bold">${{ "%.0f"|format(related.price) }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-grid">
+                                <a href="{{ url_for('product.product_detail', product_id=related.id) }}" 
+                                   class="btn btn-outline-primary btn-sm">查看詳情</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
