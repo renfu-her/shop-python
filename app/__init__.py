@@ -2,6 +2,7 @@ from flask import Flask, render_template
 from config import Config
 from app.utils.db import init_db
 import os
+from app.extensions import db
 
 def create_app():
     # Get the absolute path to the app directory
@@ -15,8 +16,9 @@ def create_app():
                 static_url_path='/static')
     app.config.from_object(Config)
     
-    # Initialize database
-    init_db(app)
+    # Initialize databases
+    init_db(app)  # existing PyMySQL usage (kept for backward compatibility)
+    db.init_app(app)  # SQLAlchemy ORM
     
     # Register blueprints
     from app.controllers.member_controller import member_bp

@@ -1,4 +1,6 @@
 from app.utils.db import get_db_connection
+from app.extensions import db
+from app.models.orm_models import ProductORM, StoreORM, CategoryORM, OrderItemORM
 from app.utils.helpers import save_product_image
 
 class Product:
@@ -100,57 +102,41 @@ class Product:
     
     @staticmethod
     def get_all_active(category_id=None, search=None, page=1, per_page=12):
-        """Get all active products with pagination"""
-        conn = get_db_connection()
+        """Get all active products with pagination (ORM)."""
         try:
-            with conn.cursor() as cursor:
-                where_conditions = ["p.status = 'active'", "s.status = 'active'"]
-                params = []
-                
-                if category_id:
-                    where_conditions.append("p.category_id = %s")
-                    params.append(category_id)
-                
-                if search:
-                    where_conditions.append("(p.name LIKE %s OR p.description LIKE %s)")
-                    search_term = f"%{search}%"
-                    params.extend([search_term, search_term])
-                
-                where_clause = " AND ".join(where_conditions)
-                
-                # Get total count
-                count_sql = f"""
-                    SELECT COUNT(*) as total
-                    FROM products p
-                    JOIN stores s ON p.store_id = s.id
-                    WHERE {where_clause}
-                """
-                cursor.execute(count_sql, params)
-                total = cursor.fetchone()['total']
-                
-                # Get products with pagination
-                offset = (page - 1) * per_page
-                sql = f"""
-                    SELECT p.id, p.store_id, p.category_id, p.name, p.description, p.price, 
-                           p.discount_price, p.stock, p.image_url, p.status, p.created_at,
-                           s.store_name, c.name as category_name
-                    FROM products p
-                    JOIN stores s ON p.store_id = s.id
-                    JOIN categories c ON p.category_id = c.id
-                    WHERE {where_clause}
-                    ORDER BY p.created_at DESC
-                    LIMIT %s OFFSET %s
-                """
-                cursor.execute(sql, params + [per_page, offset])
-                results = cursor.fetchall()
-                
-                products = [Product(**{k: v for k, v in result.items() if k in ['id', 'store_id', 'category_id', 'name', 'description', 'price', 'discount_price', 'stock', 'image_url', 'status', 'created_at']}) for result in results]
-                
-                return products, total
-        except Exception as e:
+            q = (
+                db.session.query(ProductORM)
+                .join(StoreORM, ProductORM.store_id == StoreORM.id)
+                .filter(ProductORM.status == 'active', StoreORM.status == 'active')
+            )
+            if category_id:
+                q = q.filter(ProductORM.category_id == category_id)
+            if search:
+                like = f"%{search}%"
+                q = q.filter(db.or_(ProductORM.name.like(like), ProductORM.description.like(like)))
+
+            total = q.count()
+            offset = (page - 1) * per_page
+            orm_list = q.order_by(ProductORM.created_at.desc()).offset(offset).limit(per_page).all()
+
+            products = []
+            for orm in orm_list:
+                products.append(Product(
+                    id=orm.id,
+                    store_id=orm.store_id,
+                    category_id=orm.category_id,
+                    name=orm.name,
+                    description=orm.description,
+                    price=orm.price,
+                    discount_price=orm.discount_price,
+                    stock=orm.stock,
+                    image_url=orm.image_url,
+                    status=orm.status,
+                    created_at=orm.created_at
+                ))
+            return products, total
+        except Exception:
             return [], 0
-        finally:
-            conn.close()
     
     def update(self, name=None, description=None, price=None, discount_price=None, stock=None, category_id=None, status=None, image_file=None):
         """Update product"""
@@ -241,56 +227,64 @@ class Product:
     @staticmethod
     def get_top_new(limit=8):
         """Get newest active products across active stores (for 熱門商品)."""
-        conn = get_db_connection()
         try:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    SELECT p.id, p.store_id, p.category_id, p.name, p.description, p.price,
-                           p.discount_price, p.stock, p.image_url, p.status, p.created_at,
-                           s.store_name, c.name as category_name
-                    FROM products p
-                    JOIN stores s ON p.store_id = s.id
-                    JOIN categories c ON p.category_id = c.id
-                    WHERE p.status = 'active' AND s.status = 'active'
-                    ORDER BY p.created_at DESC
-                    LIMIT %s
-                    """,
-                    (limit,)
-                )
-                results = cursor.fetchall()
-                return [Product(**{k: v for k, v in result.items() if k in ['id', 'store_id', 'category_id', 'name', 'description', 'price', 'discount_price', 'stock', 'image_url', 'status', 'created_at']}) for result in results]
+            q = (
+                db.session.query(ProductORM)
+                .join(StoreORM, ProductORM.store_id == StoreORM.id)
+                .join(CategoryORM, ProductORM.category_id == CategoryORM.id)
+                .filter(ProductORM.status == 'active', StoreORM.status == 'active')
+                .order_by(ProductORM.created_at.desc())
+                .limit(limit)
+            )
+            orm_list = q.all()
+            products = []
+            for orm in orm_list:
+                products.append(Product(
+                    id=orm.id,
+                    store_id=orm.store_id,
+                    category_id=orm.category_id,
+                    name=orm.name,
+                    description=orm.description,
+                    price=orm.price,
+                    discount_price=orm.discount_price,
+                    stock=orm.stock,
+                    image_url=orm.image_url,
+                    status=orm.status,
+                    created_at=orm.created_at
+                ))
+            return products
         except Exception:
             return []
-        finally:
-            conn.close()
 
     @staticmethod
     def get_top_best_sellers(limit=8):
         """Get best-selling products by total quantity sold (for 熱銷商品)."""
-        conn = get_db_connection()
         try:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    SELECT p.id, p.store_id, p.category_id, p.name, p.description, p.price,
-                           p.discount_price, p.stock, p.image_url, p.status, p.created_at,
-                           s.store_name, c.name as category_name,
-                           SUM(oi.quantity) AS sold_qty
-                    FROM order_items oi
-                    JOIN products p ON oi.product_id = p.id
-                    JOIN stores s ON p.store_id = s.id
-                    JOIN categories c ON p.category_id = c.id
-                    WHERE p.status = 'active' AND s.status = 'active'
-                    GROUP BY p.id
-                    ORDER BY sold_qty DESC
-                    LIMIT %s
-                    """,
-                    (limit,)
-                )
-                results = cursor.fetchall()
-                return [Product(**{k: v for k, v in result.items() if k in ['id', 'store_id', 'category_id', 'name', 'description', 'price', 'discount_price', 'stock', 'image_url', 'status', 'created_at']}) for result in results]
+            q = (
+                db.session.query(ProductORM, db.func.sum(OrderItemORM.quantity).label('sold_qty'))
+                .join(OrderItemORM, OrderItemORM.product_id == ProductORM.id)
+                .join(StoreORM, ProductORM.store_id == StoreORM.id)
+                .filter(ProductORM.status == 'active', StoreORM.status == 'active')
+                .group_by(ProductORM.id)
+                .order_by(db.desc('sold_qty'))
+                .limit(limit)
+            )
+            rows = q.all()
+            products = []
+            for orm, _sold in rows:
+                products.append(Product(
+                    id=orm.id,
+                    store_id=orm.store_id,
+                    category_id=orm.category_id,
+                    name=orm.name,
+                    description=orm.description,
+                    price=orm.price,
+                    discount_price=orm.discount_price,
+                    stock=orm.stock,
+                    image_url=orm.image_url,
+                    status=orm.status,
+                    created_at=orm.created_at
+                ))
+            return products
         except Exception:
             return []
-        finally:
-            conn.close()
