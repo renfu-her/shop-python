@@ -142,10 +142,6 @@ def init_db(app):
                 ('美妝', '美妝保養'),
                 ('時尚', '時尚服飾'),
                 ('書店', '書籍文具');
-                
-                # Insert default admin user (password: admin123)
-                INSERT IGNORE INTO users (username, password_hash, role) VALUES
-                ('admin', 'scrypt:32768:8:1$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4Qz8z8z8z8', 'admin');
                 """
                 
                 # Execute each CREATE TABLE statement separately
@@ -154,6 +150,15 @@ def init_db(app):
                     statement = statement.strip()
                     if statement:
                         cursor.execute(statement)
+                conn.commit()
+                
+                # Insert default admin user (password: admin)
+                from werkzeug.security import generate_password_hash
+                admin_password_hash = generate_password_hash('admin')
+                cursor.execute(
+                    "INSERT IGNORE INTO users (username, password_hash, role) VALUES (%s, %s, %s)",
+                    ('admin', admin_password_hash, 'admin')
+                )
                 conn.commit()
                 
         except Exception as e:

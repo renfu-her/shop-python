@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}管理後台 - DEMO 商場{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 250px;
+            background-color: #212529;
+            color: white;
+            padding: 1.5rem;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s ease-in-out;
+        }
+        .admin-main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            padding: 2rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        .admin-header {
+            background-color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background-color: #212529;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+            .admin-sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            .admin-main-content {
+                margin-left: 0;
+                padding: 1rem;
+                padding-top: 4rem;
+            }
+            .mobile-menu-overlay.show {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i> 選單
+    </button>
+    
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    
+    <!-- Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">
+                <i class="fas fa-cog me-2"></i>管理後台
+            </h4>
+            <button class="btn btn-link text-white d-md-none p-0" id="closeSidebar" style="font-size: 1.5rem;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link text-white-50 {% if request.endpoint == 'admin.dashboard' %}active text-white{% endif %}" href="{{ url_for('admin.dashboard') }}">
+                <i class="fas fa-home me-2"></i>儀表板
+            </a>
+            <a class="nav-link text-white-50 {% if request.endpoint == 'admin.stores' %}active text-white{% endif %}" href="{{ url_for('admin.stores') }}">
+                <i class="fas fa-store me-2"></i>商店管理
+            </a>
+            <a class="nav-link text-white-50 {% if request.endpoint in ['admin.users', 'admin.create_user'] %}active text-white{% endif %}" href="{{ url_for('admin.users') }}">
+                <i class="fas fa-users me-2"></i>使用者管理
+            </a>
+            <a class="nav-link text-white-50 {% if request.endpoint == 'admin.orders' %}active text-white{% endif %}" href="{{ url_for('admin.orders') }}">
+                <i class="fas fa-shopping-cart me-2"></i>訂單管理
+            </a>
+            <a class="nav-link text-white-50 {% if request.endpoint in ['admin.coupons', 'admin.create_coupon'] %}active text-white{% endif %}" href="{{ url_for('admin.coupons') }}">
+                <i class="fas fa-ticket-alt me-2"></i>優惠券管理
+            </a>
+            <hr class="text-white-50 my-3">
+            <a class="nav-link text-white-50" href="{{ url_for('admin.logout') }}">
+                <i class="fas fa-sign-out-alt me-2"></i>登出
+            </a>
+            <a class="nav-link text-white-50" href="{{ url_for('product.index') }}">
+                <i class="fas fa-store me-2"></i>返回前台
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <script>
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const adminSidebar = document.getElementById('adminSidebar');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const closeSidebar = document.getElementById('closeSidebar');
+        
+        function openSidebar() {
+            adminSidebar.classList.add('show');
+            mobileMenuOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeSidebarFunc() {
+            adminSidebar.classList.remove('show');
+            mobileMenuOverlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', openSidebar);
+        }
+        
+        if (closeSidebar) {
+            closeSidebar.addEventListener('click', closeSidebarFunc);
+        }
+        
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', closeSidebarFunc);
+        }
+        
+        // Close sidebar when clicking on a nav link (mobile only)
+        if (window.innerWidth <= 768) {
+            const navLinks = document.querySelectorAll('.admin-sidebar .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    setTimeout(closeSidebarFunc, 300);
+                });
+            });
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

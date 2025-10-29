@@ -2,9 +2,11 @@ from flask import Flask, render_template
 from config import Config
 from app.utils.db import init_db
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 from app.extensions import db
 
-def create_app():
+def create_app(config_class=Config):
     # Get the absolute path to the app directory
     app_dir = os.path.dirname(os.path.abspath(__file__))
     template_dir = os.path.join(app_dir, 'views')
@@ -14,7 +16,25 @@ def create_app():
                 template_folder=template_dir, 
                 static_folder=static_dir, 
                 static_url_path='/static')
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
+    
+    # Setup logging
+    if not app.debug and not app.testing:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/shop.log', maxBytes=10240, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('Shop startup')
+    
+    # Enable debug toolbar-like features in development
+    if app.debug:
+        app.logger.setLevel(logging.DEBUG)
+        app.logger.debug('Debug mode enabled')
     
     # Initialize databases
     init_db(app)  # existing PyMySQL usage (kept for backward compatibility)
@@ -31,11 +51,11 @@ def create_app():
     
     app.register_blueprint(member_bp, url_prefix='/member')
     app.register_blueprint(store_bp, url_prefix='/store')
-    app.register_blueprint(product_bp, url_prefix='/shop')
+    app.register_blueprint(product_bp)
     app.register_blueprint(cart_bp, url_prefix='/cart')
     app.register_blueprint(order_bp, url_prefix='/order')
     app.register_blueprint(coupon_bp, url_prefix='/coupon')
-    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(admin_bp, url_prefix='/backend')
     
     # Root route
     @app.route('/')

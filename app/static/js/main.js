@@ -100,14 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Product image zoom (if needed)
-    const productImages = document.querySelectorAll('.product-card img');
-    productImages.forEach(function(img) {
-        img.addEventListener('click', function() {
-            // Implement image zoom modal here
-            console.log('Image clicked:', this.src);
-        });
-    });
 
     // Form validation
     const forms = document.querySelectorAll('.needs-validation');

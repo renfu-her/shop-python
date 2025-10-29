@@ -27,7 +27,8 @@ def index():
     shuffle(popular_products)
     shuffle(best_sellers)
     
-    categories = Category.get_all()
+    # Only show categories that have products
+    categories = Category.get_with_products()
     
     return render_template('shop/index.html', 
                          products=products, 

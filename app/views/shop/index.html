@@ -9,12 +9,123 @@
         <div class="hero-section text-white p-5">
             <h1 class="display-4 fw-bold">歡迎來到DEMO 商場</h1>
             <p class="lead">發現最優質的商品，享受購物樂趣</p>
-            <a href="#products" class="btn btn-demo btn-lg">開始購物</a>
         </div>
     </div>
 </div>
 
-<!-- Highlight Sections -->
+<!-- Category Filter Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">商品分類</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('product.index') }}" 
+                       class="btn btn-outline-primary {{ 'active' if not current_category else '' }}">
+                        全部
+                    </a>
+                    {% for category in categories %}
+                    <a href="{{ url_for('product.index', category=category.id) }}" 
+                       class="btn btn-outline-primary {{ 'active' if current_category == category.id else '' }}">
+                        {{ category.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Products Section (only show when category is selected) -->
+{% if current_category %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">
+                {% for category in categories %}
+                    {% if category.id == current_category %}
+                        {{ category.name }}
+                    {% endif %}
+                {% endfor %}
+                商品 (共 {{ total }} 個)
+            </h2>
+        </div>
+        <div class="row">
+            {% if products %}
+                {% for product in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 product-card">
+                        {% if product.image_url %}
+                        <img src="{{ url_for('static', filename=product.image_url) }}" 
+                             class="card-img-top" 
+                             alt="{{ product.name }}"
+                             style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                             style="height: 200px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ product.name }}</h6>
+                            <p class="card-text text-muted small">{{ product.store_name }}</p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    {% if product.discount_price %}
+                                    <div>
+                                        <span class="text-danger fw-bold fs-5">${{ "%.0f"|format(product.discount_price) }}</span>
+                                        <small class="text-muted text-decoration-line-through ms-1">${{ "%.0f"|format(product.price) }}</small>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-primary fw-bold fs-5">${{ "%.0f"|format(product.price) }}</span>
+                                    {% endif %}
+                                    
+                                    {% if product.stock > 0 %}
+                                    <small class="text-success">庫存：{{ product.stock }}</small>
+                                    {% else %}
+                                    <small class="text-danger">缺貨</small>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('product.product_detail', product_id=product.id) }}" 
+                                       class="btn btn-outline-primary btn-sm">查看詳情</a>
+                                    
+                                    {% if product.stock > 0 and session.member_id %}
+                                    <form method="POST" action="{{ url_for('product.add_to_cart') }}" class="d-grid">
+                                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-cart-plus me-1"></i>加入購物車
+                                        </button>
+                                    </form>
+                                    {% elif not session.member_id %}
+                                    <a href="{{ url_for('member.login') }}" class="btn btn-outline-secondary btn-sm">請先登入</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">此分類暫無商品</h4>
+                    <p class="text-muted">請嘗試其他分類</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Hot Products Section (only show when no category is selected) -->
+{% if not current_category %}
 <div class="row mb-4">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -62,6 +173,7 @@
     </div>
 </div>
 
+<!-- Best Sellers Section (only show when no category is selected) -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -108,171 +220,6 @@
         </div>
     </div>
 </div>
-
-<!-- Category Filter -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">商品分類</h5>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ url_for('product.index') }}" 
-                       class="btn btn-outline-primary {{ 'active' if not current_category else '' }}">
-                        全部
-                    </a>
-                    <a href="{{ url_for('product.index', category=1) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 1 else '' }}">
-                        3C
-                    </a>
-                    <a href="{{ url_for('product.index', category=2) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 2 else '' }}">
-                        周邊
-                    </a>
-                    <a href="{{ url_for('product.index', category=3) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 3 else '' }}">
-                        筆電
-                    </a>
-                    <a href="{{ url_for('product.index', category=4) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 4 else '' }}">
-                        通訊
-                    </a>
-                    <a href="{{ url_for('product.index', category=5) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 5 else '' }}">
-                        數位
-                    </a>
-                    <a href="{{ url_for('product.index', category=6) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 6 else '' }}">
-                        家電
-                    </a>
-                    <a href="{{ url_for('product.index', category=7) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 7 else '' }}">
-                        日用
-                    </a>
-                    <a href="{{ url_for('product.index', category=8) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 8 else '' }}">
-                        母嬰
-                    </a>
-                    <a href="{{ url_for('product.index', category=9) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 9 else '' }}">
-                        食品
-                    </a>
-                    <a href="{{ url_for('product.index', category=10) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 10 else '' }}">
-                        生活
-                    </a>
-                    <a href="{{ url_for('product.index', category=11) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 11 else '' }}">
-                        居家
-                    </a>
-                    <a href="{{ url_for('product.index', category=12) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 12 else '' }}">
-                        休閒
-                    </a>
-                    <a href="{{ url_for('product.index', category=13) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 13 else '' }}">
-                        保健
-                    </a>
-                    <a href="{{ url_for('product.index', category=14) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 14 else '' }}">
-                        美妝
-                    </a>
-                    <a href="{{ url_for('product.index', category=15) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 15 else '' }}">
-                        時尚
-                    </a>
-                    <a href="{{ url_for('product.index', category=16) }}" 
-                       class="btn btn-outline-primary {{ 'active' if current_category == 16 else '' }}">
-                        書店
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Products Section -->
-<div id="products" class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>商品列表</h2>
-            {% if search %}
-                <span class="text-muted">搜尋結果：{{ search }} (共 {{ total }} 個商品)</span>
-            {% elif current_category %}
-                <span class="text-muted">分類：{{ ['', '3C', '周邊', '筆電', '通訊', '數位', '家電', '日用', '母嬰', '食品', '生活', '居家', '休閒', '保健', '美妝', '時尚', '書店'][current_category] }} (共 {{ total }} 個商品)</span>
-            {% else %}
-                <span class="text-muted">共 {{ total }} 個商品</span>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    {% for product in products %}
-    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-        <div class="card h-100 product-card">
-            {% if product.image_url %}
-            <img src="{{ url_for('static', filename=product.image_url) }}" 
-                 class="card-img-top" 
-                 alt="{{ product.name }}"
-                 style="height: 200px; object-fit: cover;">
-            {% else %}
-            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
-                 style="height: 200px;">
-                <i class="fas fa-image fa-3x text-muted"></i>
-            </div>
-            {% endif %}
-            
-            <div class="card-body d-flex flex-column">
-                <h6 class="card-title">{{ product.name }}</h6>
-                <p class="card-text text-muted small">{{ product.store_name }}</p>
-                
-                <div class="mt-auto">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        {% if product.discount_price %}
-                        <div>
-                            <span class="text-danger fw-bold fs-5">${{ "%.0f"|format(product.discount_price) }}</span>
-                            <small class="text-muted text-decoration-line-through ms-1">${{ "%.0f"|format(product.price) }}</small>
-                        </div>
-                        {% else %}
-                        <span class="text-primary fw-bold fs-5">${{ "%.0f"|format(product.price) }}</span>
-                        {% endif %}
-                        
-                        {% if product.stock > 0 %}
-                        <small class="text-success">庫存：{{ product.stock }}</small>
-                        {% else %}
-                        <small class="text-danger">缺貨</small>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('product.product_detail', product_id=product.id) }}" 
-                           class="btn btn-outline-primary btn-sm">查看詳情</a>
-                        
-                        {% if product.stock > 0 and session.member_id %}
-                        <form method="POST" action="{{ url_for('product.add_to_cart') }}" class="d-grid">
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="btn btn-primary btn-sm">
-                                <i class="fas fa-cart-plus me-1"></i>加入購物車
-                            </button>
-                        </form>
-                        {% elif not session.member_id %}
-                        <a href="{{ url_for('member.login') }}" class="btn btn-outline-secondary btn-sm">請先登入</a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% else %}
-    <div class="col-12">
-        <div class="text-center py-5">
-            <i class="fas fa-search fa-3x text-muted mb-3"></i>
-            <h4 class="text-muted">沒有找到商品</h4>
-            <p class="text-muted">請嘗試其他搜尋條件或分類</p>
-        </div>
-    </div>
-    {% endfor %}
-</div>
+{% endif %}
 
 {% endblock %}

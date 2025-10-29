@@ -1,0 +1,105 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}優惠券管理 - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>優惠券管理</h2>
+    <a href="{{ url_for('admin.create_coupon') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>新增優惠券
+    </a>
+</div>
+
+<!-- Coupons List -->
+<div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ticket-alt me-2"></i>優惠券列表
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if coupons %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>代碼</th>
+                                    <th>折扣類型</th>
+                                    <th>折扣值</th>
+                                    <th>最低消費</th>
+                                    <th>適用範圍</th>
+                                    <th>使用次數</th>
+                                    <th>有效期限</th>
+                                    <th>狀態</th>
+                                    <th>建立時間</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for coupon in coupons %}
+                                <tr>
+                                    <td><strong class="text-primary">{{ coupon.code }}</strong></td>
+                                    <td>
+                                        {% if coupon.discount_type == 'percentage' %}
+                                            <span class="badge bg-info">百分比</span>
+                                        {% else %}
+                                            <span class="badge bg-success">固定金額</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if coupon.discount_type == 'percentage' %}
+                                            {{ coupon.discount_value }}%
+                                        {% else %}
+                                            ${{ "%.2f"|format(coupon.discount_value) }}
+                                        {% endif %}
+                                    </td>
+                                    <td>${{ "%.2f"|format(coupon.min_purchase) if coupon.min_purchase else '0' }}</td>
+                                    <td>
+                                        {% if coupon.applicable_to == 'all' %}
+                                            <span class="badge bg-secondary">全部</span>
+                                        {% elif coupon.applicable_to == 'store' %}
+                                            <span class="badge bg-primary">指定商店</span>
+                                        {% elif coupon.applicable_to == 'category' %}
+                                            <span class="badge bg-info">指定分類</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if coupon.usage_limit %}
+                                            {{ coupon.used_count }} / {{ coupon.usage_limit }}
+                                        {% else %}
+                                            {{ coupon.used_count }} / 無限制
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if coupon.valid_from and coupon.valid_to %}
+                                            {{ coupon.valid_from.strftime('%Y-%m-%d') }}<br>
+                                            <small class="text-muted">至 {{ coupon.valid_to.strftime('%Y-%m-%d') }}</small>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if coupon.valid_from and coupon.valid_to %}
+                                            <span class="badge bg-success">已設定</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">未設定</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ coupon.created_at.strftime('%Y-%m-%d') if coupon.created_at else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">暫無優惠券</p>
+                        <a href="{{ url_for('admin.create_coupon') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>新增優惠券
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+{% endblock %}
+

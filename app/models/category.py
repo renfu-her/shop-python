@@ -24,6 +24,27 @@ class Category:
             conn.close()
     
     @staticmethod
+    def get_with_products():
+        """Get only categories that have active products"""
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT DISTINCT c.id, c.name, c.description, c.created_at
+                    FROM categories c
+                    INNER JOIN products p ON c.id = p.category_id
+                    INNER JOIN stores s ON p.store_id = s.id
+                    WHERE p.status = 'active' AND s.status = 'active'
+                    ORDER BY c.name
+                """)
+                results = cursor.fetchall()
+                return [Category(**result) for result in results]
+        except Exception as e:
+            return []
+        finally:
+            conn.close()
+    
+    @staticmethod
     def get_by_id(category_id):
         """Get category by ID"""
         conn = get_db_connection()

@@ -1,0 +1,157 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}管理後台 - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>儀表板</h2>
+    <div class="text-muted">
+        <i class="fas fa-user me-2"></i>{{ session.admin_username }}
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2">總會員數</h6>
+                        <h3 class="card-title mb-0">{{ stats.total_members }}</h3>
+                        <small class="text-white-50" style="visibility: hidden;">佔位</small>
+                    </div>
+                    <i class="fas fa-users fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2">總商店數</h6>
+                        <h3 class="card-title mb-0">{{ stats.total_stores }}</h3>
+                        <small class="text-white-50">啟用: {{ stats.active_stores }}</small>
+                    </div>
+                    <i class="fas fa-store fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2">總商品數</h6>
+                        <h3 class="card-title mb-0">{{ stats.total_products }}</h3>
+                        <small class="text-white-50" style="visibility: hidden;">佔位</small>
+                    </div>
+                    <i class="fas fa-box fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2">總訂單數</h6>
+                        <h3 class="card-title mb-0">{{ stats.total_orders }}</h3>
+                        <small class="text-white-50" style="visibility: hidden;">佔位</small>
+                    </div>
+                    <i class="fas fa-shopping-cart fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Revenue Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2">總營收</h6>
+                        <h2 class="card-title mb-0">${{ "%.2f"|format(stats.total_revenue) }}</h2>
+                    </div>
+                    <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>最近訂單
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if stats.recent_orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>訂單編號</th>
+                                <th>會員</th>
+                                <th>金額</th>
+                                <th>狀態</th>
+                                <th>日期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in stats.recent_orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.member_name }}</td>
+                                <td>${{ "%.2f"|format(order.final_amount) }}</td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                        <span class="badge bg-warning">待處理</span>
+                                    {% elif order.status == 'confirmed' %}
+                                        <span class="badge bg-info">已確認</span>
+                                    {% elif order.status == 'shipped' %}
+                                        <span class="badge bg-primary">已出貨</span>
+                                    {% elif order.status == 'delivered' %}
+                                        <span class="badge bg-success">已送達</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span class="badge bg-danger">已取消</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <a href="{{ url_for('admin.orders') }}" class="btn btn-sm btn-outline-primary">
+                                        查看詳情
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">暫無訂單</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

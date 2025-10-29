@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
+    # Debug Configuration
+    # Set to True by default for development, use FLASK_DEBUG env var to override
+    DEBUG = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+    
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
     # MySQL Database Configuration
@@ -18,6 +22,7 @@ class Config:
         or f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DB}?charset=utf8mb4"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = DEBUG  # Print SQL queries in debug mode
     
     # Upload Configuration
     UPLOAD_FOLDER = 'app/static/images/products'
@@ -27,3 +32,6 @@ class Config:
     # Pagination
     PRODUCTS_PER_PAGE = 12
     ORDERS_PER_PAGE = 10
+    
+    # Logging Configuration
+    LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')

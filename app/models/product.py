@@ -5,7 +5,7 @@ from app.utils.helpers import save_product_image
 
 class Product:
     def __init__(self, id=None, store_id=None, category_id=None, name=None, description=None, 
-                 price=None, discount_price=None, stock=None, image_url=None, status=None, created_at=None):
+                 price=None, discount_price=None, stock=None, image_url=None, status=None, created_at=None, store_name=None):
         self.id = id
         self.store_id = store_id
         self.category_id = category_id
@@ -17,6 +17,7 @@ class Product:
         self.image_url = image_url
         self.status = status
         self.created_at = created_at
+        self.store_name = store_name
     
     @staticmethod
     def create(store_id, category_id, name, description, price, discount_price=None, stock=0, image_file=None):
@@ -132,7 +133,8 @@ class Product:
                     stock=orm.stock,
                     image_url=orm.image_url,
                     status=orm.status,
-                    created_at=orm.created_at
+                    created_at=orm.created_at,
+                    store_name=orm.store.store_name if orm.store else None
                 ))
             return products, total
         except Exception:

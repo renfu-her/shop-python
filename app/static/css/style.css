@@ -83,10 +83,6 @@ body {
     transition: transform 0.2s ease-in-out;
 }
 
-.product-card:hover .card-img-top {
-    transform: scale(1.05);
-}
-
 .btn {
     border-radius: 0.375rem;
     font-weight: 500;
@@ -405,6 +401,19 @@ footer p {
 .badge-pending {
     background-color: #ffc107;
     color: #000;
+}
+
+/* Category filter active state */
+.btn-outline-primary.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-outline-primary.active:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    color: white;
 }
 
 /* Error page styles */

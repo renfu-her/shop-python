@@ -7,8 +7,20 @@ from app.utils.auth import admin_login_required
 
 admin_bp = Blueprint('admin', __name__)
 
+@admin_bp.route('/')
+def index():
+    """Redirect to dashboard if logged in, otherwise to login"""
+    if 'admin_id' in session:
+        return redirect(url_for('admin.dashboard'))
+    else:
+        return redirect(url_for('admin.login'))
+
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # If already logged in, redirect to dashboard
+    if 'admin_id' in session:
+        return redirect(url_for('admin.dashboard'))
+    
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -124,7 +136,21 @@ def create_user():
 @admin_bp.route('/stores')
 @admin_login_required
 def stores():
-    stores = Store.get_all_active()
+    # Get all stores (not just active ones) for admin review
+    from app.utils.db import get_db_connection
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT s.id, s.member_id, s.store_name, s.description, s.status, s.created_at, m.name as owner_name 
+                FROM stores s 
+                JOIN members m ON s.member_id = m.id 
+                ORDER BY s.created_at DESC
+            """)
+            stores = cursor.fetchall()
+    finally:
+        conn.close()
+    
     return render_template('admin/stores.html', stores=stores)
 
 @admin_bp.route('/approve_store/<int:store_id>')
@@ -204,5 +230,29 @@ def create_coupon():
 @admin_login_required
 def orders():
     page = request.args.get('page', 1, type=int)
-    orders, total = Order.get_all(page=page)
+    # Get orders with member names directly from database
+    from app.utils.db import get_db_connection
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            # Get total count
+            cursor.execute("SELECT COUNT(*) as total FROM orders")
+            total = cursor.fetchone()['total']
+            
+            # Get orders with pagination
+            per_page = 10
+            offset = (page - 1) * per_page
+            cursor.execute("""
+                SELECT o.id, o.member_id, o.order_number, o.total_amount, o.discount_amount, 
+                       o.final_amount, o.coupon_id, o.status, o.created_at, m.name as member_name
+                FROM orders o
+                JOIN members m ON o.member_id = m.id
+                ORDER BY o.created_at DESC 
+                LIMIT %s OFFSET %s
+            """, (per_page, offset))
+            
+            orders = cursor.fetchall()
+    finally:
+        conn.close()
+    
     return render_template('admin/orders.html', orders=orders, total=total, page=page)
