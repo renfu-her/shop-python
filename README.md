@@ -1,206 +1,193 @@
-# DEMO 商場 (DEMO Mall E-commerce Platform)
+# DEMO Mall (E-commerce Platform)
 
-一個基於 Flask MVC 架構的電商平台，支援多商店經營模式，提供完整的購物車、優惠券、訂單管理等功能。
+DEMO Mall is a Flask-based e-commerce platform with a multi-store model, featuring cart, coupons, and order management. The project uses server-side templates and modern UI components for a clean shopping experience.
 
-## 功能特色
+## Features
 
-### 🛍️ 商城功能
-- **商品瀏覽**：支援分類篩選、搜尋功能
-- **購物車**：商品加入、數量調整、移除
-- **結帳系統**：支援優惠券應用
-- **訂單管理**：訂單追蹤、狀態更新
+### 🛍️ Shopping
+- Product browsing with category filters and search
+- Cart: add, update quantity, remove
+- Checkout with coupon support
+- Order tracking and status updates
 
-### 👥 會員系統
-- **會員註冊/登入**：獨立的會員認證系統
-- **個人資料管理**：個人資訊編輯
-- **我的商店**：會員可創建多個商店
-- **訂單歷史**：查看購買記錄
+### 👥 Member System
+- Member registration and login
+- Profile management
+- My Stores: members can create multiple stores
+- Order history
 
-### 🏪 商店管理
-- **商店創建**：會員可創建多個商店
-- **商品管理**：商品 CRUD 操作
-- **訂單處理**：商店訂單管理
-- **優惠券管理**：商店專屬優惠券
+### 🏪 Store Management
+- Store creation and review flow
+- Product CRUD
+- Store order management
+- Store-specific coupons
 
-### 👨‍💼 後台管理
-- **管理員登入**：獨立的後台認證
-- **商店審核**：啟用/停用商店
-- **用戶管理**：管理員帳號管理
-- **平台優惠券**：全站優惠券管理
-- **訂單監控**：全站訂單查看
+### 👨‍💼 Admin Console
+- Admin authentication
+- Store review (enable/disable)
+- User management
+- Global coupons
+- Order monitoring
 
-### 🎫 優惠券系統
-- **多種折扣類型**：百分比折扣、固定金額折扣
-- **使用限制**：最低消費、最大折扣、使用次數限制
-- **適用範圍**：全站、特定商店、特定分類
-- **有效期管理**：開始/結束時間設定
+### 🎫 Coupon System
+- Percentage and fixed amount discounts
+- Constraints: min spend, max discount, usage limits
+- Scope: global, store-specific, category-specific
+- Validity period control (start/end time)
 
-## 技術架構
+## Tech Stack
 
-### 後端技術
-- **框架**：Flask 2.3.3
-- **資料庫**：MySQL
-- **ORM**：PyMySQL
-- **認證**：Werkzeug Security
-- **表單**：WTForms
+### Backend
+- Flask 2.3.3
+- MySQL
+- ORM: Flask-SQLAlchemy (SQLAlchemy 2.x). Legacy PyMySQL access is kept for backward compatibility during migration
+- Forms: WTForms
+- Auth: Werkzeug Security
 
-### 前端技術
-- **CSS 框架**：Bootstrap 5.3.0
-- **圖標**：Font Awesome 6.0.0
-- **JavaScript**：原生 JS + Bootstrap JS
+### Frontend
+- Bootstrap 5.3.0
+- Font Awesome 6.x
+- Vanilla JS + Bootstrap JS
 
-### 資料庫設計
-- **members**：會員資料
-- **users**：管理員帳號
-- **stores**：商店資料
-- **categories**：商品分類
-- **products**：商品資料
-- **coupons**：優惠券
-- **orders**：訂單
-- **order_items**：訂單明細
-- **cart**：購物車
+### Database Schema (tables)
+- members, users, stores, categories, products, coupons, orders, order_items, cart
 
-## 安裝與設定
+## Getting Started
 
-### 1. 環境需求
+### 1) Prerequisites
 - Python 3.8+
 - MySQL 5.7+
 - Git
 
-### 2. 安裝步驟
+### 2) Installation
 
 ```bash
-# 1. 克隆專案
+# 1. Clone the repository
 git clone <repository-url>
-cd street-foods
+cd shop
 
-# 2. 創建虛擬環境
+# 2. Create a virtual environment
 python -m venv venv
 
-# 3. 啟動虛擬環境
+# 3. Activate the virtual environment
 # Windows
 venv\Scripts\activate
 # macOS/Linux
 source venv/bin/activate
 
-# 4. 安裝依賴
+# 4. Install dependencies
 pip install -r requirements.txt
 
-# 5. 設定資料庫
-# 確保 MySQL 服務運行，創建資料庫
+# 5. Prepare the database
+# Ensure MySQL is running, then create database
 mysql -u root -p
 CREATE DATABASE `shop-data`;
 
-# 6. 設定環境變數（可選）
-# 創建 .env 檔案
+# 6. Environment variables (optional)
 echo "SECRET_KEY=your-secret-key-here" > .env
 
-# 7. 運行應用
+# 7. Run the app
 python run.py
 ```
 
-### 3. 資料庫設定
-- **主機**：localhost
-- **用戶名**：root
-- **密碼**：空（可修改 config.py）
-- **資料庫**：shop-data
+### 3) Configuration
+- Host: `localhost`
+- User: `root`
+- Password: empty by default (change in `config.py`)
+- Database: `shop-data`
 
-### 4. 預設帳號
-- **管理員**：username: `admin`, password: `admin123`
-- **會員**：需要註冊
+The ORM connection string is configured via `SQLALCHEMY_DATABASE_URI` in `config.py`. You can also set `DATABASE_URL` to override it.
 
-## 使用說明
+### 4) Default Accounts
+- Admin: username `admin`, password `admin123`
+- Member: register via UI
 
-### 會員操作
-1. **註冊會員**：訪問 `/member/register`
-2. **創建商店**：登入後點擊「我的商店」→「創建新商店」
-3. **管理商品**：進入商店後台管理商品
-4. **購物**：瀏覽商品，加入購物車，結帳
+## Usage
 
-### 管理員操作
-1. **登入後台**：訪問 `/admin/login`
-2. **審核商店**：在商店管理頁面啟用/停用商店
-3. **管理優惠券**：創建全站優惠券
-4. **監控訂單**：查看所有訂單狀態
+### Member Flow
+1. Register at `/member/register`
+2. Create a store from “My Stores” after login
+3. Manage products in your store backend
+4. Browse and purchase products
 
-### 商店經營
-1. **商品上架**：添加商品資訊、價格、庫存
-2. **訂單處理**：查看訂單，更新訂單狀態
-3. **優惠券**：創建商店專屬優惠券
-4. **數據統計**：查看銷售數據
+### Admin Flow
+1. Login at `/admin/login`
+2. Review stores (enable/disable)
+3. Manage site-wide coupons
+4. Monitor orders
 
-## 專案結構
+### Store Operations
+1. Add products (name, price, stock, image)
+2. Process orders and update statuses
+3. Create store-specific coupons
+4. Review sales metrics
+
+## Project Structure
 
 ```
-street-foods/
+shop/
 ├── app/
-│   ├── __init__.py              # Flask 應用工廠
-│   ├── models/                  # 資料模型
-│   │   ├── member.py           # 會員模型
-│   │   ├── user.py             # 管理員模型
-│   │   ├── store.py            # 商店模型
-│   │   ├── product.py          # 商品模型
-│   │   ├── category.py         # 分類模型
-│   │   ├── coupon.py           # 優惠券模型
-│   │   ├── order.py            # 訂單模型
-│   │   └── cart.py             # 購物車模型
-│   ├── controllers/             # 控制器
-│   │   ├── member_controller.py    # 會員控制器
-│   │   ├── admin_controller.py     # 管理員控制器
-│   │   ├── store_controller.py     # 商店控制器
-│   │   ├── product_controller.py   # 商品控制器
-│   │   ├── cart_controller.py      # 購物車控制器
-│   │   ├── order_controller.py     # 訂單控制器
-│   │   └── coupon_controller.py    # 優惠券控制器
-│   ├── views/                   # 視圖模板
-│   │   ├── layout.html         # 基礎模板
-│   │   ├── member/             # 會員頁面
-│   │   ├── admin/              # 管理員頁面
-│   │   ├── store/              # 商店頁面
-│   │   ├── shop/               # 商城頁面
-│   │   ├── cart/               # 購物車頁面
-│   │   └── order/              # 訂單頁面
-│   ├── static/                 # 靜態資源
-│   │   ├── css/style.css       # 自定義樣式
-│   │   ├── js/main.js          # 自定義腳本
-│   │   └── images/             # 圖片資源
-│   └── utils/                  # 工具函數
-│       ├── db.py               # 資料庫連接
-│       ├── auth.py             # 認證裝飾器
-│       └── helpers.py          # 輔助函數
-├── config.py                   # 配置文件
-├── requirements.txt            # 依賴清單
-├── run.py                      # 應用入口
-└── README.md                   # 說明文檔
+│   ├── __init__.py                # Flask app factory
+│   ├── extensions.py              # SQLAlchemy instance
+│   ├── models/
+│   │   ├── orm_models.py          # SQLAlchemy ORM models (Product/Store/Category/OrderItem)
+│   │   ├── product.py             # Product service layer (compat methods)
+│   │   ├── member.py
+│   │   ├── user.py
+│   │   ├── store.py
+│   │   ├── category.py
+│   │   ├── coupon.py
+│   │   ├── order.py
+│   │   └── cart.py
+│   ├── controllers/
+│   │   ├── member_controller.py
+│   │   ├── admin_controller.py
+│   │   ├── store_controller.py
+│   │   ├── product_controller.py
+│   │   ├── cart_controller.py
+│   │   ├── order_controller.py
+│   │   └── coupon_controller.py
+│   ├── utils/
+│   │   ├── db.py                  # Legacy MySQL init (still used for some areas)
+│   │   ├── auth.py
+│   │   └── helpers.py
+│   ├── views/                     # Jinja templates
+│   │   ├── layout.html
+│   │   ├── errors/                # 404 / 500 pages
+│   │   ├── member/
+│   │   ├── admin/
+│   │   ├── store/
+│   │   ├── shop/
+│   │   ├── cart/
+│   │   └── order/
+│   └── static/
+│       ├── css/style.css
+│       ├── js/main.js
+│       └── images/
+├── config.py
+├── requirements.txt
+├── run.py
+└── README.md
 ```
 
-## 開發說明
+## Development Notes
 
-### 添加新功能
-1. 在 `models/` 中定義資料模型
-2. 在 `controllers/` 中實現業務邏輯
-3. 在 `views/` 中創建模板
-4. 在 `__init__.py` 中註冊藍圖
+- Error handling: custom 404 and 500 pages are registered in `app/__init__.py` and located at `app/views/errors/`
+- Homepage highlights: “Popular” and “Best Sellers” sections each show top 8 items in random order
+- ORM migration: key product queries now use SQLAlchemy; legacy raw SQL remains in some modules and can be migrated progressively
+- Styling: custom theme in `app/static/css/style.css` with gradient navbar/hero and accent colors
 
-### 資料庫遷移
-- 修改 `app/utils/db.py` 中的 `init_db` 函數
-- 重新運行應用會自動執行 SQL 語句
+## Security & Operations
 
-### 樣式自定義
-- 修改 `app/static/css/style.css`
-- 使用 Bootstrap 變數進行主題自定義
+1. Change default passwords and `SECRET_KEY` in production
+2. Ensure `app/static/images/products/` exists and is writable for uploads
+3. Backup MySQL regularly
+4. Consider caching when you have many products (homepage currently loads all matching products)
 
-## 注意事項
+## License
 
-1. **安全性**：生產環境請修改預設密碼和 SECRET_KEY
-2. **圖片上傳**：確保 `app/static/images/products/` 目錄存在
-3. **資料庫**：定期備份 MySQL 資料庫
-4. **性能**：大量商品時考慮添加分頁和緩存
+This project is for learning and demo purposes only. Not intended for commercial use.
 
-## 授權
+## Contact
 
-此專案僅供學習使用，請勿用於商業用途。
-
-## 聯絡資訊
-
-如有問題或建議，請聯繫開發團隊。
+For questions or suggestions, please open an issue or contact the maintainers.
