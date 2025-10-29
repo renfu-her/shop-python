@@ -275,28 +275,4 @@
     {% endfor %}
 </div>
 
-<!-- Pagination -->
-{% if total_pages > 1 %}
-<nav aria-label="商品分頁">
-    <ul class="pagination justify-content-center">
-        {% if page > 1 %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('product.index', page=page-1, category=current_category, search=search) }}">上一頁</a>
-        </li>
-        {% endif %}
-        
-        {% for p in range(1, total_pages + 1) %}
-        <li class="page-item {{ 'active' if p == page else '' }}">
-            <a class="page-link" href="{{ url_for('product.index', page=p, category=current_category, search=search) }}">{{ p }}</a>
-        </li>
-        {% endfor %}
-        
-        {% if page < total_pages %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('product.index', page=page+1, category=current_category, search=search) }}">下一頁</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
 {% endblock %}

@@ -10,14 +10,15 @@ product_bp = Blueprint('product', __name__)
 
 @product_bp.route('/')
 def index():
-    page = request.args.get('page', 1, type=int)
     category_id = request.args.get('category', type=int)
     search = request.args.get('search', '')
     
+    # For homepage, show all products without pagination
     products, total = Product.get_all_active(
         category_id=category_id,
         search=search,
-        page=page
+        page=1,
+        per_page=1000  # Large number to get all products
     )
     
     # Homepage highlight sections
@@ -25,20 +26,14 @@ def index():
     best_sellers = Product.get_top_best_sellers(limit=8)
     shuffle(popular_products)
     shuffle(best_sellers)
-
-    categories = Category.get_all()
     
-    # Pagination info
-    from math import ceil
-    total_pages = ceil(total / 12) if total > 0 else 1
+    categories = Category.get_all()
     
     return render_template('shop/index.html', 
                          products=products, 
                          categories=categories,
                          current_category=category_id,
                          search=search,
-                         page=page,
-                         total_pages=total_pages,
                          total=total,
                          popular_products=popular_products,
                          best_sellers=best_sellers)
