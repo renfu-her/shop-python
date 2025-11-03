@@ -111,7 +111,11 @@ The ORM connection string is configured via `SQLALCHEMY_DATABASE_URI` in `config
 4. Browse and purchase products
 
 ### Admin Flow
+<<<<<<< HEAD
 1. Login at `/backend/login`
+=======
+1. Login at `/admin/login`
+>>>>>>> 81d1a7905f3154c80b7086052a7b5e11d33a80b3
 2. Review stores (enable/disable)
 3. Manage site-wide coupons
 4. Monitor orders
