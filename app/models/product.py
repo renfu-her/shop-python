@@ -64,15 +64,28 @@ class Product:
                 cursor.execute("""
                     SELECT p.id, p.store_id, p.category_id, p.name, p.description, p.price, 
                            p.discount_price, p.stock, p.image_url, p.status, p.created_at,
-                           s.store_name, c.name as category_name
+                           s.store_name
                     FROM products p
-                    JOIN stores s ON p.store_id = s.id
-                    JOIN categories c ON p.category_id = c.id
+                    LEFT JOIN stores s ON p.store_id = s.id
                     WHERE p.id = %s
                 """, (product_id,))
                 result = cursor.fetchone()
                 if result:
-                    return Product(**{k: v for k, v in result.items() if k in ['id', 'store_id', 'category_id', 'name', 'description', 'price', 'discount_price', 'stock', 'image_url', 'status', 'created_at']})
+                    product = Product(
+                        id=result['id'],
+                        store_id=result['store_id'],
+                        category_id=result['category_id'],
+                        name=result['name'],
+                        description=result['description'],
+                        price=result['price'],
+                        discount_price=result['discount_price'],
+                        stock=result['stock'],
+                        image_url=result['image_url'],
+                        status=result['status'],
+                        created_at=result['created_at'],
+                        store_name=result.get('store_name')
+                    )
+                    return product
                 return None
         except Exception as e:
             return None

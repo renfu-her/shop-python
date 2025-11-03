@@ -1,0 +1,119 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}編輯商品 - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>編輯商品</h2>
+    <a href="{{ url_for('admin.products') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>返回列表
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-box me-2"></i>商品資訊
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if product.image_url %}
+                <div class="mb-3">
+                    <label class="form-label">目前圖片</label>
+                    <div>
+                        <img src="{{ url_for('static', filename=product.image_url) }}" 
+                             alt="{{ product.name }}" 
+                             class="img-thumbnail" 
+                             style="max-width: 200px; max-height: 200px;">
+                    </div>
+                </div>
+                {% endif %}
+                
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="store_id" class="form-label">商店 <span class="text-danger">*</span></label>
+                            <select class="form-select" id="store_id" name="store_id" required>
+                                <option value="">請選擇商店</option>
+                                {% for store in stores %}
+                                <option value="{{ store.id }}" {% if product.store_id == store.id %}selected{% endif %}>
+                                    {{ store.store_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="category_id" class="form-label">分類 <span class="text-danger">*</span></label>
+                            <select class="form-select" id="category_id" name="category_id" required>
+                                <option value="">請選擇分類</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if product.category_id == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">商品名稱 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">商品描述</label>
+                        <textarea class="form-control" id="description" name="description" rows="4">{{ product.description or '' }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="price" class="form-label">價格 <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" value="{{ product.price }}" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="discount_price" class="form-label">折扣價格</label>
+                            <input type="number" class="form-control" id="discount_price" name="discount_price" step="0.01" min="0" value="{{ product.discount_price if product.discount_price else '' }}">
+                            <small class="form-text text-muted">留空表示無折扣</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="stock" class="form-label">庫存數量</label>
+                            <input type="number" class="form-control" id="stock" name="stock" min="0" value="{{ product.stock }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="status" class="form-label">狀態</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="active" {% if product.status == 'active' %}selected{% endif %}>啟用</option>
+                                <option value="inactive" {% if product.status == 'inactive' %}selected{% endif %}>停用</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="image" class="form-label">更新商品圖片</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <small class="form-text text-muted">留空則保持原圖片，支援 JPG、PNG、GIF 格式，將自動轉換為 WebP 格式</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>更新商品
+                        </button>
+                        <a href="{{ url_for('admin.products') }}" class="btn btn-outline-secondary">
+                            取消
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

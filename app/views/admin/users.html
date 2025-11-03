@@ -1,13 +1,20 @@
 {% extends "admin/layout.html" %}
+{% from "admin/_macros.html" import render_pagination, render_per_page_selector %}
 
 {% block title %}使用者管理 - DEMO 商場{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>使用者管理</h2>
-    <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
-        <i class="fas fa-plus me-2"></i>新增使用者
-    </a>
+    <div class="d-flex align-items-center gap-3">
+        {{ render_per_page_selector(per_page, '位') }}
+        <div class="text-muted">
+            共 {{ total }} 位使用者
+        </div>
+        <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>新增使用者
+        </a>
+    </div>
 </div>
 
             <!-- Users List -->
@@ -49,6 +56,8 @@
                             </tbody>
                         </table>
                     </div>
+                    
+                    {{ render_pagination('admin.users', page, total, per_page) }}
                     {% else %}
                     <div class="text-center py-4">
                         <i class="fas fa-users fa-3x text-muted mb-3"></i>
@@ -60,5 +69,16 @@
                     {% endif %}
                 </div>
             </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changePerPage(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', value);
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+</script>
 {% endblock %}
 

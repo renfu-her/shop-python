@@ -1,0 +1,71 @@
+{% macro render_pagination(endpoint, page, total, per_page, search=None) %}
+{% if total > per_page %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% set total_pages = (total / per_page)|round(0, 'ceil')|int %}
+        {% set current_page = page %}
+        
+        {% if current_page > 1 %}
+        <li class="page-item">
+            {% if search %}
+            <a class="page-link" href="{{ url_for(endpoint, page=current_page - 1, per_page=per_page, search=search) }}">上一頁</a>
+            {% else %}
+            <a class="page-link" href="{{ url_for(endpoint, page=current_page - 1, per_page=per_page) }}">上一頁</a>
+            {% endif %}
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">上一頁</span>
+        </li>
+        {% endif %}
+        
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == current_page %}
+            <li class="page-item active">
+                <span class="page-link">{{ p }}</span>
+            </li>
+            {% elif p <= 3 or p >= total_pages - 2 or (p >= current_page - 1 and p <= current_page + 1) %}
+            <li class="page-item">
+                {% if search %}
+                <a class="page-link" href="{{ url_for(endpoint, page=p, per_page=per_page, search=search) }}">{{ p }}</a>
+                {% else %}
+                <a class="page-link" href="{{ url_for(endpoint, page=p, per_page=per_page) }}">{{ p }}</a>
+                {% endif %}
+            </li>
+            {% elif p == current_page - 2 or p == current_page + 2 %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if current_page < total_pages %}
+        <li class="page-item">
+            {% if search %}
+            <a class="page-link" href="{{ url_for(endpoint, page=current_page + 1, per_page=per_page, search=search) }}">下一頁</a>
+            {% else %}
+            <a class="page-link" href="{{ url_for(endpoint, page=current_page + 1, per_page=per_page) }}">下一頁</a>
+            {% endif %}
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">下一頁</span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endmacro %}
+
+{% macro render_per_page_selector(per_page, item_name='筆') %}
+<div class="d-flex align-items-center gap-2">
+    <label for="per_page" class="form-label mb-0 text-muted">每頁顯示：</label>
+    <select class="form-select form-select-sm" id="per_page" name="per_page" style="width: auto;" onchange="changePerPage(this.value)">
+        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+        <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+        <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+    </select>
+</div>
+{% endmacro %}
+

@@ -27,7 +27,7 @@ class Config:
     # Upload Configuration
     UPLOAD_FOLDER = 'app/static/images/products'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     
     # Pagination
     PRODUCTS_PER_PAGE = 12

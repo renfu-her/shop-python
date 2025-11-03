@@ -115,6 +115,9 @@
             <a class="nav-link text-white-50 {% if request.endpoint == 'admin.stores' %}active text-white{% endif %}" href="{{ url_for('admin.stores') }}">
                 <i class="fas fa-store me-2"></i>商店管理
             </a>
+            <a class="nav-link text-white-50 {% if request.endpoint in ['admin.products', 'admin.create_product', 'admin.edit_product'] %}active text-white{% endif %}" href="{{ url_for('admin.products') }}">
+                <i class="fas fa-box me-2"></i>商品管理
+            </a>
             <a class="nav-link text-white-50 {% if request.endpoint in ['admin.users', 'admin.create_user'] %}active text-white{% endif %}" href="{{ url_for('admin.users') }}">
                 <i class="fas fa-users me-2"></i>使用者管理
             </a>

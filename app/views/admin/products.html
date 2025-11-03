@@ -1,0 +1,156 @@
+{% extends "admin/layout.html" %}
+{% from "admin/_macros.html" import render_pagination, render_per_page_selector %}
+
+{% block title %}商品管理 - DEMO 商場{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>商品管理</h2>
+    <div class="d-flex align-items-center gap-3">
+        {{ render_per_page_selector(per_page, '個') }}
+        <div class="text-muted">
+            {% if search %}
+                搜尋結果：{{ total }} 個商品
+            {% else %}
+                共 {{ total }} 個商品
+            {% endif %}
+        </div>
+        <a href="{{ url_for('admin.create_product') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>新增商品
+        </a>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('admin.products') }}" class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label for="search" class="form-label">搜尋商品</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       placeholder="搜尋商品名稱、描述或商店名稱..." 
+                       value="{{ search }}">
+                <input type="hidden" name="per_page" value="{{ per_page }}">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i>搜尋
+                </button>
+            </div>
+            {% if search %}
+            <div class="col-12">
+                <a href="{{ url_for('admin.products', per_page=per_page) }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-times me-1"></i>清除搜尋
+                </a>
+                <small class="text-muted ms-2">搜尋關鍵字：{{ search }}</small>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Products List -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="fas fa-box me-2"></i>商品列表
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if products %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>商品名稱</th>
+                        <th>商店</th>
+                        <th>分類</th>
+                        <th>價格</th>
+                        <th>庫存</th>
+                        <th>狀態</th>
+                        <th>建立時間</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.id }}</td>
+                        <td>
+                            <strong>{{ product.name }}</strong>
+                            {% if product.description %}
+                                <br><small class="text-muted">{{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ product.store_name or 'N/A' }}</td>
+                        <td>{{ product.category_name or 'N/A' }}</td>
+                        <td>
+                            {% if product.discount_price %}
+                                <span class="text-danger fw-bold">${{ "%.2f"|format(product.discount_price) }}</span>
+                                <br><small class="text-muted text-decoration-line-through">${{ "%.2f"|format(product.price) }}</small>
+                            {% else %}
+                                <span class="fw-bold">${{ "%.2f"|format(product.price) }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.stock > 0 %}
+                                <span class="text-success">{{ product.stock }}</span>
+                            {% else %}
+                                <span class="text-danger">缺貨</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.status == 'active' %}
+                                <span class="badge bg-success">啟用</span>
+                            {% elif product.status == 'inactive' %}
+                                <span class="badge bg-danger">停用</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ product.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ product.created_at.strftime('%Y-%m-%d') if product.created_at else 'N/A' }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.edit_product', product_id=product.id) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit me-1"></i>編輯
+                            </a>
+                            <form method="POST" action="{{ url_for('admin.delete_product', product_id=product.id) }}" 
+                                  class="d-inline" 
+                                  onsubmit="return confirm('確定要刪除此商品嗎？此操作無法復原！');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash me-1"></i>刪除
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {{ render_pagination('admin.products', page, total, per_page, search) }}
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-box fa-3x text-muted mb-3"></i>
+            <p class="text-muted">暫無商品</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changePerPage(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', value);
+    url.searchParams.set('page', '1');
+    {% if search %}
+    url.searchParams.set('search', '{{ search }}');
+    {% endif %}
+    window.location.href = url.toString();
+}
+</script>
+{% endblock %}
+
