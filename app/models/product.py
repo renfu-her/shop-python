@@ -198,16 +198,19 @@ class Product:
                 
                 # Handle image upload
                 if image_file:
-                    # Delete old image if exists
-                    if self.image_url:
-                        delete_product_image(self.image_url)
-                    
-                    # Save new image
+                    # Save new image first
                     image_url = save_product_image(image_file, self.id)
                     if image_url:
+                        # Only delete old image after new image is successfully saved
+                        old_image_url = self.image_url
+                        
                         updates.append("image_url = %s")
                         params.append(image_url)
                         self.image_url = image_url
+                        
+                        # Delete old image after successful save
+                        if old_image_url:
+                            delete_product_image(old_image_url)
                 
                 if updates:
                     params.append(self.id)
