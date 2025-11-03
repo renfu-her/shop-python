@@ -108,6 +108,35 @@ def save_product_image(file, product_id):
                 return None
     return None
 
+def delete_product_image(image_url):
+    """Delete product image file"""
+    if not image_url:
+        return False
+    
+    try:
+        from flask import current_app
+        
+        # image_url is like "images/products/product_1_name.webp"
+        # Need to convert to full path: app/static/images/products/product_1_name.webp
+        if image_url.startswith('images/'):
+            # Construct full path
+            static_folder = current_app.config.get('UPLOAD_FOLDER', 'app/static/images/products')
+            filename = os.path.basename(image_url)
+            file_path = os.path.join(static_folder, filename)
+        else:
+            # Assume it's already a full path or relative to static folder
+            static_folder = current_app.config.get('UPLOAD_FOLDER', 'app/static/images/products')
+            file_path = os.path.join(static_folder, os.path.basename(image_url))
+        
+        # Delete file if exists
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return True
+        return False
+    except Exception as e:
+        # Silently fail if deletion fails
+        return False
+
 def generate_order_number():
     """Generate unique order number"""
     import random

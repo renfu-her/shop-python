@@ -1,7 +1,7 @@
 from app.utils.db import get_db_connection
 from app.extensions import db
 from app.models.orm_models import ProductORM, StoreORM, CategoryORM, OrderItemORM
-from app.utils.helpers import save_product_image
+from app.utils.helpers import save_product_image, delete_product_image
 
 class Product:
     def __init__(self, id=None, store_id=None, category_id=None, name=None, description=None, 
@@ -198,6 +198,11 @@ class Product:
                 
                 # Handle image upload
                 if image_file:
+                    # Delete old image if exists
+                    if self.image_url:
+                        delete_product_image(self.image_url)
+                    
+                    # Save new image
                     image_url = save_product_image(image_file, self.id)
                     if image_url:
                         updates.append("image_url = %s")
@@ -222,6 +227,10 @@ class Product:
         conn = get_db_connection()
         try:
             with conn.cursor() as cursor:
+                # Delete product image if exists
+                if self.image_url:
+                    delete_product_image(self.image_url)
+                
                 cursor.execute("DELETE FROM products WHERE id = %s", (self.id,))
                 conn.commit()
                 return True
